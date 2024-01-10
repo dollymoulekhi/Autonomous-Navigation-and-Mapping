@@ -59,3 +59,14 @@ destination = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_
                   [image.shape[1]/2 + dst_size, image.shape[0] - 2*dst_size - bottom_offset], 
                   [image.shape[1]/2 - dst_size, image.shape[0] - 2*dst_size - bottom_offset],
                   ])
+
+
+# Function to convert from cartesian to polar coordinates
+def to_polar_coords(xpix, ypix):
+    dist = np.sqrt(xpix**2 + ypix**2)
+    angles = np.arctan2(ypix, xpix)
+    return dist, angles
+
+
+
+

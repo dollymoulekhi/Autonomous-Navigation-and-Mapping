@@ -2,11 +2,17 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import cv2
-from functions import perspect_transform, color_thresh, rover_coords
+import glob 
+from functions import perspect_transform, color_thresh, rover_coords, to_polar_coords
 # Read in the sample image
-## reading image
+# reading image
 image_name = 'C:/Users/dolly/OneDrive/Desktop/example_grid1.jpg'
 image = mpimg.imread(image_name)
+
+path = r'C:/Users/dolly/OneDrive/Desktop/Udacity_code/test_dataset/IMG/*'
+img_list = glob.glob(path)
+# Grab a random image and display it
+idx = np.random.randint(0, len(img_list)-1)
 
 
 # Rover yaw values will come as floats from 0 to 360
@@ -83,20 +89,54 @@ worldmap[y_world, x_world] += 1
 print('Xpos =', rover_xpos, 'Ypos =', rover_ypos, 'Yaw =', rover_yaw)
 # Plot the map in rover-centric coords
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 7))
-f.tight_layout()
-ax1.plot(xpix, ypix, '.')
-ax1.set_title('Rover Space', fontsize=40)
-ax1.set_ylim(-160, 160)
-ax1.set_xlim(0, 160)
-ax1.tick_params(labelsize=20)
+# f, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 7))
+# f.tight_layout()
+# ax1.plot(xpix, ypix, '.')
+# ax1.set_title('Rover Space', fontsize=40)
+# ax1.set_ylim(-160, 160)
+# ax1.set_xlim(0, 160)
+# ax1.tick_params(labelsize=20)
 
-ax2.imshow(worldmap, cmap='gray')
-ax2.set_title('World Space', fontsize=40)
-ax2.set_ylim(0, 200)
-ax2.tick_params(labelsize=20)
-ax2.set_xlim(0, 200)
+# ax2.imshow(worldmap, cmap='gray')
+# ax2.set_title('World Space', fontsize=40)
+# ax2.set_ylim(0, 200)
+# ax2.tick_params(labelsize=20)
+# ax2.set_xlim(0, 200)
 
 
-plt.subplots_adjust(left=0.1, right=1, top=0.9, bottom=0.1)
-plt.show() # Uncomment if running on your local machine
+# plt.subplots_adjust(left=0.1, right=1, top=0.9, bottom=0.1)
+# plt.show() # Uncomment if running on your local machine
+
+
+
+# Grab another random image
+idx = np.random.randint(0, len(img_list)-1)
+image = mpimg.imread(img_list[idx])
+warped = perspect_transform(image, source, destination)
+threshed = color_thresh(warped)
+
+# Calculate pixel values in rover-centric coords and distance/angle to all pixels
+xpix, ypix = rover_coords(threshed)
+dist, angles = to_polar_coords(xpix, ypix)
+mean_dir = np.mean(angles)
+
+# Do some plotting
+fig = plt.figure(figsize=(12,9))
+plt.subplot(221)
+plt.imshow(image) ## used for printing normal image
+plt.subplot(222)
+plt.imshow(warped) ## used for printing top view
+plt.subplot(223)
+plt.imshow(threshed, cmap='gray') ## used for printing grey scale image
+plt.subplot(224)
+plt.plot(xpix, ypix, '.')
+plt.ylim(-160, 160)
+plt.xlim(0, 160)
+arrow_length = 100
+x_arrow = arrow_length * np.cos(mean_dir)
+y_arrow = arrow_length * np.sin(mean_dir)
+plt.arrow(0, 0, x_arrow, y_arrow, color='red', zorder=2, head_width=10, width=2)
+plt.show()
+
+
+
